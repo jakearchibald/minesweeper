@@ -24,6 +24,7 @@ export default class MinesweeperGame {
   endTime = 0;
   private _state = State.Pending;
   private _toReveal = 0;
+  // TODO: mark this private and create a getter
   _flags = 0;
 
   constructor(private _width: number, private _height: number, private _bombs: number) {
