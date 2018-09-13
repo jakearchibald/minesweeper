@@ -2,7 +2,8 @@ const path = require('path');
 
 module.exports = {
   mode: 'development',
-  entry: './src/script/index.js',
+  devtool: '',
+  entry: './src/index.html',
   output: {
     path: path.resolve(__dirname, 'dist'),
     filename: 'null.js'
@@ -33,5 +34,8 @@ module.exports = {
         exclude: /node_modules/
       }
     ]
-  }
+  },
+  resolve: {
+    extensions: [ '.tsx', '.ts', '.js' ]
+  },
 };
