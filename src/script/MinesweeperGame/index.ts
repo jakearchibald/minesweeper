@@ -24,23 +24,23 @@ export default class MinesweeperGame {
   endTime = 0;
   private _state = State.Pending;
   private _toReveal = 0;
-  private _flags = 0;
+  _flags = 0;
 
   constructor(private _width: number, private _height: number, private _bombs: number) {
     if (_bombs < 1) {
-      throw Error(`Invalid number of bombs`);
+      throw Error('Invalid number of bombs');
     }
     if (_width < 1 || _height < 1) {
-      throw Error(`Invalid dimensions`);
+      throw Error('Invalid dimensions');
     }
     if (_bombs >= _width * _height) {
-      throw Error(`Number of bombs cannot fit in grid`);
+      throw Error('Number of bombs cannot fit in grid');
     }
 
     this._toReveal = _width * _height - _bombs;
 
     this.grid = Array(_height).fill(undefined).map(() =>
-      Array(_width).fill(undefined).map(() => newCell())
+      Array(_width).fill(undefined).map(() => newCell()),
     );
   }
 
@@ -53,7 +53,7 @@ export default class MinesweeperGame {
     const cells: Cell[] = this.grid.reduce((cells, row) => {
       cells.push(...row);
       return cells;
-    }, []);
+    },                                     []);
 
     // Remove the cell played.
     cells.splice(avoidY * this._width + avoidX, 1);
@@ -61,7 +61,7 @@ export default class MinesweeperGame {
     // Place bombs in remaining squares
     let bombsToPlace = this._bombs;
 
-    while (bombsToPlace--) {
+    while (bombsToPlace -= 1) {
       const index = Math.floor(Math.random() * cells.length);
       const cell = cells[index];
       cells.splice(index, 1);
@@ -91,7 +91,7 @@ export default class MinesweeperGame {
     }
     // Cell
     if (!objsCloned.has(this.grid[y][x])) {
-      this.grid[y][x] = { ...this.grid[y][x] };
+      this.grid[y][x] = ({ ...this.grid[y][x] });
       objsCloned.add(this.grid[y][x]);
     }
   }
@@ -130,7 +130,7 @@ export default class MinesweeperGame {
       return;
     }
 
-    this._toReveal--;
+    this._toReveal -= 1;
 
     if (this._toReveal === 0) {
       this._endGame(State.Won);
@@ -144,7 +144,7 @@ export default class MinesweeperGame {
     for (const [nextX, nextY] of this._iterateSurrounding(x, y)) {
       const nextCell = this.grid[nextY][nextX];
 
-      if (nextCell.hasBomb) touching++;
+      if (nextCell.hasBomb) touching += 1;
       if (nextCell.tag === Tag.Flag || nextCell.revealed) continue;
       maybeReveal.push([nextX, nextY]);
     }
@@ -165,20 +165,20 @@ export default class MinesweeperGame {
       this._placeBombs(x, y);
       this.startTime = Date.now();
     } else if (this._state !== State.Playing) {
-      throw Error(`Game is not in a playable state`);
+      throw Error('Game is not in a playable state');
     }
 
     const cell = this.grid[y][x];
 
-    if (cell.revealed) throw Error(`Cell already revealed`);
-    if (cell.tag === Tag.Flag) throw Error(`Cell flagged`);
+    if (cell.revealed) throw Error('Cell already revealed');
+    if (cell.tag === Tag.Flag) throw Error('Cell flagged');
 
     this._reveal(x, y, new WeakSet());
   }
 
   tag(x: number, y: number, tag: Tag) {
     const oldCell = this.grid[y][x];
-    if (oldCell.revealed) throw Error(`Revealed cell cannot be tagged`);
+    if (oldCell.revealed) throw Error('Revealed cell cannot be tagged');
     if (oldCell.tag === tag) return;
 
     this._cloneUpwards(x, y, new WeakSet());
@@ -186,9 +186,9 @@ export default class MinesweeperGame {
     cell.tag = tag;
 
     if (tag === Tag.Flag) {
-      this._flags++;
+      this._flags += 1;
     } else if (oldCell.tag === Tag.Flag) {
-      this._flags--;
+      this._flags -= 1;
     }
   }
 
@@ -208,8 +208,8 @@ export default class MinesweeperGame {
       const nextCell = this.grid[nextY][nextX];
       if (nextCell.revealed) continue;
       if (nextCell.tag === Tag.Flag) {
-        flagged++;
-        return;
+        flagged += 1;
+        continue;
       }
       maybeReveal.push([nextX, nextY]);
     }
