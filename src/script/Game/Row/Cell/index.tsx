@@ -13,12 +13,13 @@ interface Props {
 interface ItemProps {
   cell: Cell;
   onUnrevealedClick(event: MouseEvent): void;
+  onTouchingClick(event: MouseEvent): void;
 }
 
 export const enum Action { Reveal, Flag, Unflag, RevealSurrounding }
 
 // tslint:disable-next-line:variable-name
-const Item = ({ cell, onUnrevealedClick }: ItemProps) => {
+const Item = ({ cell, onUnrevealedClick, onTouchingClick }: ItemProps) => {
   if (!cell.revealed) {
     return (
       <button
@@ -33,7 +34,7 @@ const Item = ({ cell, onUnrevealedClick }: ItemProps) => {
     return <div class={styles.mine}>Mine</div>;
   }
   if (cell.touching) {
-    return <div class={styles.touching}>{cell.touching}</div>;
+    return <button onClick={onTouchingClick} class={styles.touching}>{cell.touching}</button>;
   }
 
   return <div class={styles.item}/>;
@@ -59,10 +60,20 @@ export default class GridCell extends Component<Props, State> {
     this.props.onClick(Action.Reveal);
   }
 
+  @bind
+  onTouchingClick(event: MouseEvent) {
+    if (!event.shiftKey) return;
+    this.props.onClick(Action.RevealSurrounding);
+  }
+
   render({ cell }: Props) {
     return (
       <td class={styles.cell}>
-        <Item cell={cell} onUnrevealedClick={this.onUnrevealedClick} />
+        <Item
+          cell={cell}
+          onUnrevealedClick={this.onUnrevealedClick}
+          onTouchingClick={this.onTouchingClick}
+        />
       </td>
     );
   }

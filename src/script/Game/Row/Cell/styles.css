@@ -35,6 +35,7 @@
 }
 
 .touching {
+  composes: unbutton;
   composes: item;
   display: flex;
   align-items: center;

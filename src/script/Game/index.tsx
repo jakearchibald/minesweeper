@@ -40,6 +40,9 @@ export default class Game extends Component<Props, State> {
       case Action.Reveal:
         this.game.reveal(x, y);
         break;
+      case Action.RevealSurrounding:
+        this.game.attemptSurroundingReveal(x, y);
+        break;
     }
 
     this.setState({
