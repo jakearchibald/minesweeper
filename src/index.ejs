@@ -1,0 +1,11 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <% for (const url of entrypoints.main.assets) { %>
+    <script type="module" src="<%=url %>"></script>
+  <% } %>
+</head>
+<body>
+  <h1>Hello!</h1>
+</body>
+</html>
