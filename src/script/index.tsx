@@ -31,9 +31,8 @@ class App extends Component<Props, State> {
   render(props: Props, state: State) {
     return (
       state.mode === 'home' ?
-        <Home onSelect={this.onGameSelect} />
-        :
-        <Game />
+        <Home onSelect={this.onGameSelect} /> :
+        <Game width={state.width} height={state.height} mines={state.mines} />
     );
   }
 }

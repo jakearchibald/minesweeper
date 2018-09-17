@@ -77,7 +77,8 @@ export default class Home extends Component<Props, State> {
   }
 
   @bind
-  onSubmit() {
+  onSubmit(event: Event) {
+    event.preventDefault();
     const { width, height, mines } = this.state;
     this.props.onSelect(width, height, mines);
   }

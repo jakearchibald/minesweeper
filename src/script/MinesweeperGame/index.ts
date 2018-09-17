@@ -1,8 +1,8 @@
-const enum State { Pending, Playing, Lost, Won }
+export const enum State { Pending, Playing, Lost, Won }
 
-const enum Tag { None, Flag, Mark }
+export const enum Tag { None, Flag, Mark }
 
-interface Cell {
+export interface Cell {
   hasMine: boolean;
   tag: Tag;
   revealed: boolean;
@@ -24,7 +24,6 @@ export default class MinesweeperGame {
   endTime = 0;
   private _state = State.Pending;
   private _toReveal = 0;
-  // TODO: mark this private and create a getter
   _flags = 0;
 
   constructor(private _width: number, private _height: number, private _mines: number) {
@@ -45,16 +44,23 @@ export default class MinesweeperGame {
     );
   }
 
+  get state() {
+    return this._state;
+  }
+
   private _endGame(state: State.Won | State.Lost) {
     this._state = state;
     this.endTime = Date.now();
   }
 
   private _placeMines(avoidX: number, avoidY: number) {
-    const cells: Cell[] = this.grid.reduce((cells, row) => {
-      cells.push(...row);
-      return cells;
-    },                                     []);
+    const cells: Cell[] = this.grid.reduce(
+      (cells, row) => {
+        cells.push(...row);
+        return cells;
+      },
+      [],
+    );
 
     // Remove the cell played.
     cells.splice(avoidY * this._width + avoidX, 1);
@@ -120,7 +126,7 @@ export default class MinesweeperGame {
   private _reveal(x: number, y: number, objsCloned: WeakSet<any>) {
     // Cloning the objects, but then just mutating from there on, so this.grid
     // appears to be immutable from the outside.
-    // Yeah, bit of a hack.
+    // Yeah, bit of a cheat.
     this._cloneUpwards(x, y, objsCloned);
     const cell = this.grid[y][x];
 
@@ -146,7 +152,7 @@ export default class MinesweeperGame {
       const nextCell = this.grid[nextY][nextX];
 
       if (nextCell.hasMine) touching += 1;
-      if (nextCell.tag === Tag.Flag || nextCell.revealed) continue;
+      if (nextCell.tag === Tag.Flag) continue;
       maybeReveal.push([nextX, nextY]);
     }
 
@@ -157,6 +163,8 @@ export default class MinesweeperGame {
 
     // Reveal the surrounding squares
     for (const [nextX, nextY] of maybeReveal) {
+      const nextCell = this.grid[nextY][nextX];
+      if (nextCell.revealed) continue;
       this._reveal(nextX, nextY, objsCloned);
     }
   }
