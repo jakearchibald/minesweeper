@@ -135,6 +135,8 @@ export default class MinesweeperGame {
     this._cloneUpwards(x, y, objsCloned);
     const cell = this.grid[y][x];
 
+    if (cell.revealed) throw Error('Cell already revealed');
+
     cell.revealed = true;
 
     if (cell.hasMine) {
@@ -166,7 +168,7 @@ export default class MinesweeperGame {
     // Don't reveal the surrounding squares if this is touching a mine.
     if (touching !== 0) return;
 
-    // Reveal the surrounding squares
+    // Reveal the surrounding squares, unless already revealed
     for (const [nextX, nextY] of maybeReveal) {
       const nextCell = this.grid[nextY][nextX];
       if (nextCell.revealed) continue;
@@ -184,7 +186,6 @@ export default class MinesweeperGame {
 
     const cell = this.grid[y][x];
 
-    if (cell.revealed) throw Error('Cell already revealed');
     if (cell.tag === Tag.Flag) throw Error('Cell flagged');
 
     this._reveal(x, y, new WeakSet());
@@ -220,7 +221,6 @@ export default class MinesweeperGame {
 
     for (const [nextX, nextY] of this._iterateSurrounding(x, y)) {
       const nextCell = this.grid[nextY][nextX];
-      if (nextCell.revealed) continue;
       if (nextCell.tag === Tag.Flag) {
         flagged += 1;
         continue;
@@ -233,6 +233,8 @@ export default class MinesweeperGame {
 
     const objsCloned = new WeakSet();
     for (const [nextX, nextY] of maybeReveal) {
+      const nextCell = this.grid[nextY][nextX];
+      if (nextCell.revealed) continue;
       this._reveal(nextX, nextY, objsCloned);
     }
 
