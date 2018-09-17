@@ -6,6 +6,7 @@ import { Action } from './Row/Cell';
 
 interface State {
   grid: Cell[][];
+  flags: number;
 }
 
 interface Props {
@@ -24,6 +25,7 @@ export default class Game extends Component<Props, State> {
     this.game = new MinesweeperGame(width, height, mines);
     this.state = {
       grid: this.game.grid,
+      flags: this.game.flags,
     };
   }
 
@@ -42,6 +44,7 @@ export default class Game extends Component<Props, State> {
 
     this.setState({
       grid: this.game.grid,
+      flags: this.game.flags,
     });
   }
 
@@ -49,6 +52,7 @@ export default class Game extends Component<Props, State> {
     return (
       <div>
         <h1>Game</h1>
+        <p>To flag: {props.mines - state.flags}</p>
         <table class={styles.grid}>
           {this.game.grid.map((row, i) =>
             // tslint:disable-next-line:jsx-no-lambda

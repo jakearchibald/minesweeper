@@ -29,7 +29,6 @@ class HTMLRender {
 
 module.exports = {
   mode: devMode ? 'development' : 'production',
-  devtool: '',
   entry: {
     main: './src/script/index.tsx',
   },

@@ -24,7 +24,7 @@ export default class MinesweeperGame {
   endTime = 0;
   private _state = State.Pending;
   private _toReveal = 0;
-  _flags = 0;
+  private _flags = 0;
 
   constructor(private _width: number, private _height: number, private _mines: number) {
     if (_mines < 1) {
@@ -48,6 +48,10 @@ export default class MinesweeperGame {
     return this._state;
   }
 
+  get flags() {
+    return this._flags;
+  }
+
   private _endGame(state: State.Won | State.Lost) {
     this._state = state;
     this.endTime = Date.now();
@@ -68,11 +72,12 @@ export default class MinesweeperGame {
     // Place mines in remaining squares
     let minesToPlace = this._mines;
 
-    while (minesToPlace -= 1) {
+    while (minesToPlace) {
       const index = Math.floor(Math.random() * cells.length);
       const cell = cells[index];
       cells.splice(index, 1);
       cell.hasMine = true;
+      minesToPlace -= 1;
     }
 
     this._state = State.Playing;
