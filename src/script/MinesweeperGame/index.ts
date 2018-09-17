@@ -3,7 +3,7 @@ const enum State { Pending, Playing, Lost, Won }
 const enum Tag { None, Flag, Mark }
 
 interface Cell {
-  hasBomb: boolean;
+  hasMine: boolean;
   tag: Tag;
   revealed: boolean;
   touching: number;
@@ -11,7 +11,7 @@ interface Cell {
 
 function newCell(): Cell {
   return {
-    hasBomb: false,
+    hasMine: false,
     tag: Tag.None,
     revealed: false,
     touching: -1,
@@ -27,18 +27,18 @@ export default class MinesweeperGame {
   // TODO: mark this private and create a getter
   _flags = 0;
 
-  constructor(private _width: number, private _height: number, private _bombs: number) {
-    if (_bombs < 1) {
-      throw Error('Invalid number of bombs');
+  constructor(private _width: number, private _height: number, private _mines: number) {
+    if (_mines < 1) {
+      throw Error('Invalid number of mines');
     }
     if (_width < 1 || _height < 1) {
       throw Error('Invalid dimensions');
     }
-    if (_bombs >= _width * _height) {
-      throw Error('Number of bombs cannot fit in grid');
+    if (_mines >= _width * _height) {
+      throw Error('Number of mines cannot fit in grid');
     }
 
-    this._toReveal = _width * _height - _bombs;
+    this._toReveal = _width * _height - _mines;
 
     this.grid = Array(_height).fill(undefined).map(() =>
       Array(_width).fill(undefined).map(() => newCell()),
@@ -50,7 +50,7 @@ export default class MinesweeperGame {
     this.endTime = Date.now();
   }
 
-  private _placeBombs(avoidX: number, avoidY: number) {
+  private _placeMines(avoidX: number, avoidY: number) {
     const cells: Cell[] = this.grid.reduce((cells, row) => {
       cells.push(...row);
       return cells;
@@ -59,14 +59,14 @@ export default class MinesweeperGame {
     // Remove the cell played.
     cells.splice(avoidY * this._width + avoidX, 1);
 
-    // Place bombs in remaining squares
-    let bombsToPlace = this._bombs;
+    // Place mines in remaining squares
+    let minesToPlace = this._mines;
 
-    while (bombsToPlace -= 1) {
+    while (minesToPlace -= 1) {
       const index = Math.floor(Math.random() * cells.length);
       const cell = cells[index];
       cells.splice(index, 1);
-      cell.hasBomb = true;
+      cell.hasMine = true;
     }
 
     this._state = State.Playing;
@@ -126,7 +126,7 @@ export default class MinesweeperGame {
 
     cell.revealed = true;
 
-    if (cell.hasBomb) {
+    if (cell.hasMine) {
       this._endGame(State.Lost);
       return;
     }
@@ -145,14 +145,14 @@ export default class MinesweeperGame {
     for (const [nextX, nextY] of this._iterateSurrounding(x, y)) {
       const nextCell = this.grid[nextY][nextX];
 
-      if (nextCell.hasBomb) touching += 1;
+      if (nextCell.hasMine) touching += 1;
       if (nextCell.tag === Tag.Flag || nextCell.revealed) continue;
       maybeReveal.push([nextX, nextY]);
     }
 
     cell.touching = touching;
 
-    // Don't reveal the surrounding squares if this is touching a bomb.
+    // Don't reveal the surrounding squares if this is touching a mine.
     if (touching !== 0) return;
 
     // Reveal the surrounding squares
@@ -163,7 +163,7 @@ export default class MinesweeperGame {
 
   reveal(x: number, y: number) {
     if (this._state === State.Pending) {
-      this._placeBombs(x, y);
+      this._placeMines(x, y);
       this.startTime = Date.now();
     } else if (this._state !== State.Playing) {
       throw Error('Game is not in a playable state');

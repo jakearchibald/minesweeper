@@ -1,11 +1,13 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <% for (const url of entrypoints.main.assets) { %>
+  <% for (const url of entrypoints.main.assets.filter(a => a.endsWith('.css'))) { %>
+    <link rel="stylesheet" href="<%=url %>"></script>
+  <% } %>
+  <% for (const url of entrypoints.main.assets.filter(a => a.endsWith('.js'))) { %>
     <script type="module" src="<%=url %>"></script>
   <% } %>
 </head>
 <body>
-  <h1>Hello!</h1>
 </body>
 </html>
