@@ -128,12 +128,7 @@ export default class MinesweeperGame {
    * @param y
    * @param objsCloned A weakmap to track which objects have already been cloned.
    */
-  private _reveal(x: number, y: number) {
-    // Cloning the objects, but then just mutating from there on, so this.grid
-    // appears to be immutable from the outside.
-    // Yeah, bit of a cheat.
-    const objsCloned = new WeakSet();
-
+  private _reveal(x: number, y: number, objsCloned = new WeakSet()) {
     // The set contains the cell position as if it were a single flat array.
     const revealSet = new Set<number>([x + y * this._width]);
 
@@ -167,7 +162,7 @@ export default class MinesweeperGame {
         const nextCell = this.grid[nextY][nextX];
 
         if (nextCell.hasMine) touching += 1;
-        if (nextCell.tag === Tag.Flag) continue;
+        if (nextCell.tag === Tag.Flag || nextCell.revealed) continue;
         maybeReveal.push(nextX + nextY * this._width);
       }
 
@@ -235,10 +230,11 @@ export default class MinesweeperGame {
     if (flagged < cell.touching) return false;
     if (maybeReveal.length === 0) return false;
 
+    const objsCloned = new WeakSet();
     for (const [nextX, nextY] of maybeReveal) {
       const nextCell = this.grid[nextY][nextX];
       if (nextCell.revealed) continue;
-      this._reveal(nextX, nextY);
+      this._reveal(nextX, nextY, objsCloned);
     }
 
     return true;
