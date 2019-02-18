@@ -128,51 +128,55 @@ export default class MinesweeperGame {
    * @param y
    * @param objsCloned A weakmap to track which objects have already been cloned.
    */
-  private _reveal(x: number, y: number, objsCloned: WeakSet<any>) {
+  private _reveal(x: number, y: number) {
     // Cloning the objects, but then just mutating from there on, so this.grid
     // appears to be immutable from the outside.
     // Yeah, bit of a cheat.
-    this._cloneUpwards(x, y, objsCloned);
-    const cell = this.grid[y][x];
+    const objsCloned = new WeakSet();
 
-    if (cell.revealed) throw Error('Cell already revealed');
+    // The set contains the cell position as if it were a single flat array.
+    const revealSet = new Set<number>([x + y * this._width]);
 
-    cell.revealed = true;
+    for (const value of revealSet) {
+      const x = value % this._width;
+      const y = (value - x) / this._width;
 
-    if (cell.hasMine) {
-      this._endGame(State.Lost);
-      return;
-    }
+      this._cloneUpwards(x, y, objsCloned);
+      const cell = this.grid[y][x];
 
-    this._toReveal -= 1;
+      if (cell.revealed) throw Error('Cell already revealed');
+      cell.revealed = true;
 
-    if (this._toReveal === 0) {
-      this._endGame(State.Won);
-      // Although the game is over, we still continue to calculate the touching value.
-    }
+      if (cell.hasMine) {
+        this._endGame(State.Lost);
+        return;
+      }
 
-    let touching = 0;
-    const maybeReveal: [number, number][] = [];
+      this._toReveal -= 1;
 
-    // Go around the surrounding squares
-    for (const [nextX, nextY] of this._iterateSurrounding(x, y)) {
-      const nextCell = this.grid[nextY][nextX];
+      if (this._toReveal === 0) {
+        this._endGame(State.Won);
+        // Although the game is over, we still continue to calculate the touching value.
+      }
 
-      if (nextCell.hasMine) touching += 1;
-      if (nextCell.tag === Tag.Flag) continue;
-      maybeReveal.push([nextX, nextY]);
-    }
+      let touching = 0;
+      const maybeReveal: number[] = [];
 
-    cell.touching = touching;
+      // Go around the surrounding squares
+      for (const [nextX, nextY] of this._iterateSurrounding(x, y)) {
+        const nextCell = this.grid[nextY][nextX];
 
-    // Don't reveal the surrounding squares if this is touching a mine.
-    if (touching !== 0) return;
+        if (nextCell.hasMine) touching += 1;
+        if (nextCell.tag === Tag.Flag) continue;
+        maybeReveal.push(nextX + nextY * this._width);
+      }
 
-    // Reveal the surrounding squares, unless already revealed
-    for (const [nextX, nextY] of maybeReveal) {
-      const nextCell = this.grid[nextY][nextX];
-      if (nextCell.revealed) continue;
-      this._reveal(nextX, nextY, objsCloned);
+      cell.touching = touching;
+
+      // Don't reveal the surrounding squares if this is touching a mine.
+      if (touching !== 0) continue;
+
+      for (const num of maybeReveal) revealSet.add(num);
     }
   }
 
@@ -188,7 +192,7 @@ export default class MinesweeperGame {
 
     if (cell.tag === Tag.Flag) throw Error('Cell flagged');
 
-    this._reveal(x, y, new WeakSet());
+    this._reveal(x, y);
   }
 
   tag(x: number, y: number, tag: Tag) {
@@ -231,11 +235,10 @@ export default class MinesweeperGame {
     if (flagged < cell.touching) return false;
     if (maybeReveal.length === 0) return false;
 
-    const objsCloned = new WeakSet();
     for (const [nextX, nextY] of maybeReveal) {
       const nextCell = this.grid[nextY][nextX];
       if (nextCell.revealed) continue;
-      this._reveal(nextX, nextY, objsCloned);
+      this._reveal(nextX, nextY);
     }
 
     return true;
